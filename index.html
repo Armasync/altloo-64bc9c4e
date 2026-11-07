@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لوحة تحكم Altloo — إدارة العمليات</title>
+<meta name="description" content="لوحة تحكم Altloo لمنصة الغرف الصوتية: البانرات، الأعضاء، السحوبات، شريط الحظ والغرف المباشرة.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230B0B0C'/%3E%3Ctext x='16' y='22' font-size='16' fill='%23D4AF37' text-anchor='middle' font-family='serif'%3EA%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ============ login ============ -->
+<div id="loginView" class="login-wrap">
+  <form id="loginForm" class="card login" autocomplete="on">
+    <div class="seal">A</div>
+    <h2>لوحة تحكم Altloo</h2>
+    <p class="muted">دخول فريق الإدارة لإدارة العروض والأعضاء والاقتصاد.</p>
+
+    <label for="apiBase">عنوان الخادم (API)</label>
+    <input id="apiBase" name="apiBase" type="url" placeholder="http://localhost:8080" required>
+
+    <label for="email">البريد الإلكتروني</label>
+    <input id="email" name="email" type="email" placeholder="admin@altloo.app" required>
+
+    <label for="password">كلمة المرور</label>
+    <input id="password" name="password" type="password" placeholder="••••••••" required>
+
+    <div style="margin-top:18px">
+      <button class="btn gold" type="submit" style="width:100%">دخول</button>
+    </div>
+    <div id="loginMsg" class="msg"></div>
+  </form>
+</div>
+
+<!-- ============ dashboard ============ -->
+<div id="dashView" class="shell hidden">
+  <aside class="side">
+    <div class="brand">ALTLOO<small>لوحة التحكم</small></div>
+    <button class="nav-btn active" data-tab="overview"><span class="ico">◈</span>نظرة عامة</button>
+    <button class="nav-btn" data-tab="banners"><span class="ico">✦</span>البانرات</button>
+    <button class="nav-btn" data-tab="users"><span class="ico">☺</span>الأعضاء</button>
+    <button class="nav-btn" data-tab="withdrawals"><span class="ico">💎</span>السحوبات</button>
+    <button class="nav-btn" data-tab="luck"><span class="ico">🎡</span>شريط الحظ</button>
+    <button class="nav-btn" data-tab="rooms"><span class="ico">🎙</span>الغرف</button>
+    <button class="nav-btn" data-tab="audit"><span class="ico">≡</span>سجل العمليات</button>
+    <button class="nav-btn" id="logoutBtn" style="margin-top:auto"><span class="ico">⏻</span>خروج</button>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1 id="pageTitle">نظرة عامة</h1>
+      <button class="btn small" id="refreshBtn">تحديث</button>
+    </div>
+    <div id="globalMsg" class="msg"></div>
+
+    <!-- overview -->
+    <section id="tab-overview" class="tab">
+      <div class="grid k4" id="statsGrid"></div>
+      <div class="grid k2" style="margin-top:16px">
+        <div class="card">
+          <h3 style="margin-top:0;font-size:15px">أحدث الأعضاء</h3>
+          <table><tbody id="recentUsers"></tbody></table>
+        </div>
+        <div class="card">
+          <h3 style="margin-top:0;font-size:15px">آخر العمليات</h3>
+          <table><tbody id="recentAudit"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- banners -->
+    <section id="tab-banners" class="tab hidden">
+      <div class="grid k2">
+        <form id="bannerForm" class="card">
+          <h3 style="margin-top:0;font-size:15px" id="bannerFormTitle">بانر جديد</h3>
+          <input type="hidden" id="bannerId">
+          <label for="bannerTitle">العنوان</label>
+          <input id="bannerTitle" required maxlength="60" placeholder="ليلة الذهب">
+          <label for="bannerSub">الوصف</label>
+          <input id="bannerSub" maxlength="120" placeholder="ضاعف أرباحك من شريط الحظ">
+          <label for="bannerEmoji">الرمز</label>
+          <input id="bannerEmoji" maxlength="4" placeholder="🌙">
+          <label for="bannerKind">نوع الهدف</label>
+          <select id="bannerKind">
+            <option value="link">رابط خارجي</option>
+            <option value="room">غرفة داخل التطبيق</option>
+          </select>
+          <label for="bannerTarget">الرابط أو رمز الغرفة</label>
+          <input id="bannerTarget" placeholder="https://… أو 123456">
+          <div class="grid k2" style="margin-top:6px">
+            <div><label for="bannerStart">يبدأ</label><input id="bannerStart" type="date" required></div>
+            <div><label for="bannerEnd">ينتهي</label><input id="bannerEnd" type="date" required></div>
+          </div>
+          <label for="bannerOrder">الترتيب</label>
+          <input id="bannerOrder" type="number" value="0" min="0">
+          <label style="display:flex;gap:8px;align-items:center;margin-top:14px">
+            <input id="bannerActive" type="checkbox" checked style="width:auto"> مفعّل
+          </label>
+          <div class="row-actions" style="margin-top:16px">
+            <button class="btn gold" type="submit">حفظ البانر</button>
+            <button class="btn" type="button" id="bannerReset">تفريغ</button>
+          </div>
+        </form>
+        <div class="card">
+          <h3 style="margin-top:0;font-size:15px">البانرات الحالية</h3>
+          <table>
+            <thead><tr><th>العنوان</th><th>الفترة</th><th>الحالة</th><th></th></tr></thead>
+            <tbody id="bannerRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- users -->
+    <section id="tab-users" class="tab hidden">
+      <div class="card">
+        <div class="row-actions" style="margin-bottom:14px">
+          <input id="userSearch" placeholder="ابحث بالاسم أو المعرّف…" style="max-width:320px">
+        </div>
+        <table>
+          <thead><tr><th>الاسم</th><th>المعرّف</th><th>الوسيلة</th><th>الحالة</th><th>الرصيد</th><th>إجراء</th></tr></thead>
+          <tbody id="userRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- withdrawals -->
+    <section id="tab-withdrawals" class="tab hidden">
+      <div class="card">
+        <h3 style="margin-top:0;font-size:15px">طلبات السحب</h3>
+        <table>
+          <thead><tr><th>العضو</th><th>الألماس</th><th>المبلغ</th><th>الوسيلة</th><th>الحساب</th><th>الحالة</th><th>إجراء</th></tr></thead>
+          <tbody id="withdrawRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- luck -->
+    <section id="tab-luck" class="tab hidden">
+      <div class="grid k2">
+        <form id="luckForm" class="card">
+          <h3 style="margin-top:0;font-size:15px">إعدادات شريط الحظ</h3>
+          <label for="luckCooldown">زمن الانتظار بين الدورات (ساعات)</label>
+          <input id="luckCooldown" type="number" min="1" max="48" step="1">
+          <label for="luckStep">زيادة المضاعف لكل يوم متتالٍ</label>
+          <input id="luckStep" type="number" min="0.1" max="2" step="0.1">
+          <label for="luckMax">أعلى مضاعف</label>
+          <input id="luckMax" type="number" min="1" max="10" step="0.5">
+          <p class="muted" style="margin-top:12px">تُطبَّق القيم على كل الأعضاء من أول دورة تالية.</p>
+          <div class="row-actions" style="margin-top:14px">
+            <button class="btn gold" type="submit">حفظ الإعدادات</button>
+          </div>
+        </form>
+        <div class="card">
+          <h3 style="margin-top:0;font-size:15px">آخر الدورات</h3>
+          <table>
+            <thead><tr><th>العضو</th><th>الجائزة</th><th>المضاعف</th><th>الوقت</th></tr></thead>
+            <tbody id="spinRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- rooms -->
+    <section id="tab-rooms" class="tab hidden">
+      <div class="card">
+        <table>
+          <thead><tr><th>الغرفة</th><th>المضيف</th><th>التصنيف</th><th>المستمعون</th><th>الحالة</th><th>إجراء</th></tr></thead>
+          <tbody id="roomRows"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- audit -->
+    <section id="tab-audit" class="tab hidden">
+      <div class="card">
+        <table>
+          <thead><tr><th>العملية</th><th>المستخدم</th><th>الوقت</th></tr></thead>
+          <tbody id="auditRows"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
